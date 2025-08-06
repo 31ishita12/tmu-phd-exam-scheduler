@@ -1,0 +1,26 @@
+from fastapi import FastAPI, HTTPException
+from datetime import datetime, timedelta
+
+app = FastAPI()
+
+def compute_key_dates(oral_str):
+    oral    = datetime.fromisoformat(oral_str).date()
+    written = oral - timedelta(days=14)
+    start   = written - timedelta(days=21)
+    end     = written - timedelta(days=14)
+    proposal= oral   - timedelta(days=14)
+    return {
+        "oral_exam":           oral.isoformat(),
+        "written_exam":        written.isoformat(),
+        "sched_request_from":  start.isoformat(),
+        "sched_request_to":    end.isoformat(),
+        "proposal_to_committee": proposal.isoformat(),
+    }
+
+@app.get("/deadlines")
+def deadlines(oral: str):
+    try:
+        return compute_key_dates(oral)
+    except Exception:
+        raise HTTPException(400, "Invalid date format. Use YYYY-MM-DD.")
+
